@@ -2,11 +2,63 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <string>
+#include <vector>
 
 using namespace std;
 
+struct cell
+{
+    int cellType;
+    bool hit;
+    cell(){};
+    cell(int cellType, bool hit)
+    {
+        this->cellType = cellType;
+        this->hit = hit;
+    }
+};
+
+vector<int> shipLengths({2,3,3,4,5});
+
+void randomizeBoard(cell (&board)[10][10])
+{
+
+    for(int i=0; i<shipLengths.size(); ++i)
+    {
+        bool fits;
+        do
+        {
+            fits = false;
+            int x=rand()%10;
+            int y=rand()%10;
+            int orientation = rand()%4;
+            switch(orientation)
+            {
+                case 0:
+                    //up
+                    
+                    break;
+                case 1:
+                    //right
+                    break;
+                case 2:
+                    //down
+                    break;
+                case 3:
+                    //left
+                    break;
+                default:
+                    cout<<"wut how are u here"<<endl;
+            }
+            cout<<x<<" "<<y<<" "<<orientation<<endl;
+        }while(fits);
+        
+    }
+}
+
 int main()
 {
+    srand(time(NULL));
     //processus pere
     
     // a process will read from its own pipe, write to the other
@@ -22,7 +74,8 @@ int main()
 	{
         bool gameNotDone = true;
         // in child1 process
-        int board[10][10] = {0};
+        cell board[10][10];
+        randomizeBoard(board);
         // TODO: setup board
         
 		char c[2];
@@ -56,7 +109,7 @@ int main()
             printf(c);
             read(p1[0], &c, 2);     // read coordinate
             printf(c);
-            //break;
+            break;
         }
         printf("done1");
 		return 0; //end the process at the end
@@ -103,7 +156,7 @@ int main()
                 //TODO: figure out what coordinate to send
                 write(p1[1], "B2", 2);     // write coordinate
                 printf(c);
-                //break;
+                break;
             }
             printf("2 done");
             return 0;
