@@ -67,6 +67,32 @@ int coordToCoord(vector<vector<cell> >&board, char coord1[], char coord2[], int 
     return -1;
 }
 
+//Affiche le tableau du processus user
+void affichage(vector<vector<cell> > &board)
+{
+    printf("     A   B   C   D   E   F   G   H   I   J \n");
+    for(int i = 0; i < 10; i++)
+    {
+        printf("   -----------------------------------------\n");
+        if(i == 9)
+        {
+            printf("%d ", (i+1));
+        }
+        else
+        {
+            printf("%d  ", (i+1));
+        }
+        
+        for(int j = 0; j < 9; j++)
+        {
+            //Insertion des valeurs contenues dans le tableau du user
+            printf("| %d ", board[i][j].cellType);
+        }
+        printf("| %d ", board[i][9].cellType);
+        printf("|\n");
+    }
+}
+
 void randomizeBoard(vector<vector<cell> >&board)
 {
     for(int i=0; i<shipLengths.size(); ++i)
@@ -165,7 +191,8 @@ int main()
         vector<vector<cell> > board(10, vector<cell>(10, cell(0,0)));
         randomizeBoard(board);
         // TODO: setup board
-        
+        affichage(board);
+        return 0;
 		char c[2];
 		read(p1[0], &c, 2); // read coordinate
         
