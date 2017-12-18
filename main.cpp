@@ -22,6 +22,7 @@ struct cell
 vector<int> shipLengths({2,3,3,4,5});
 
 // return the length of the boat if it fits, else return -1
+// if placeBoat is set to a boat label, actually place the boat, if not, only return if you CAN place it there (by returning the length of the boat).
 int coordToCoord(vector<vector<cell> >&board, char coord1[], char coord2[], int placeBoat = -1)
 {
     if(coord1[0] == coord2[0])
@@ -59,6 +60,10 @@ int coordToCoord(vector<vector<cell> >&board, char coord1[], char coord2[], int 
                 if(board[i][otherCoord].cellType != 0)
                 {
                     return -1;
+                }
+                if(placeBoat != -1)
+                {
+                    board[i][otherCoord].cellType = placeBoat;
                 }
             }
             return abs(c1 - c2);
@@ -103,15 +108,16 @@ void randomizeBoard(vector<vector<cell> >&board)
             fits = false;
             int x=rand()%10;
             int y=rand()%10;
-            int orientation = rand()%4;
+            int orientation = rand()%2;
+            
             char coord1[2] = {char(x+int('A')), char(y+int('0'))};
+            
             switch(orientation)
             {
                 case 0:
                 {
-                    //up
-                    char coord2[2] = {char(x+int('A')), char(y+int('0')-shipLengths[i])};
-                    cout<<coord2<<endl;
+                    //down
+                    char coord2[2] = {char(x+int('A')), char(y+int('0')+shipLengths[i])};
                     if(coordToCoord(board, coord1, coord2) >= 0)
                     {
                         //place the ship from coord1 to coord2
@@ -122,41 +128,15 @@ void randomizeBoard(vector<vector<cell> >&board)
                 }
                 case 1:
                 {
+                    
                     //right
                     char coord2[2] = {char(x+int('A')+shipLengths[i]), char(y+int('0'))};
-                    cout<<coord2<<endl;
                     if(coordToCoord(board, coord1, coord2) >= 0)
                     {
                         //place the ship from coord1 to coord2
                         coordToCoord(board, coord1, coord2, i+1); // with the boatNum flag, it places the boat
+                        fits=true;
                     }
-                    fits=true;
-                    break;
-                }
-                case 2:
-                {
-                    //down
-                    char coord2[2] = {char(x+int('A')), char(y+int('0')+shipLengths[i])};
-                    cout<<coord2<<endl;
-                    if(coordToCoord(board, coord1, coord2) >= 0)
-                    {
-                        //place the ship from coord1 to coord2
-                        coordToCoord(board, coord1, coord2, i+1); // with the boatNum flag, it places the boat
-                    }
-                    fits=true;
-                    break;
-                }
-                case 3:
-                {
-                    //left
-                    char coord2[2] = {char(x+int('A')-shipLengths[i]), char(y+int('0'))};
-                    cout<<coord2<<endl;
-                    if(coordToCoord(board, coord1, coord2) >= 0)
-                    {
-                        //place the ship from coord1 to coord2
-                        coordToCoord(board, coord1, coord2, i+1); // with the boatNum flag, it places the boat
-                    }
-                    fits=true;
                     break;
                 }
                 default:
@@ -164,9 +144,7 @@ void randomizeBoard(vector<vector<cell> >&board)
                     cout<<"wut how are u here"<<endl;
                 }
             }
-            //cout<<x<<" "<<y<<" "<<orientation<<endl;
-        }while(fits);
-        
+        }while(!fits);
     }
 }
 
