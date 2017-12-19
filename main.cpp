@@ -2,9 +2,10 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <string>
+#include <string.h> //strcmp
 #include <vector>
 #include <cmath> //abs
-#include <string.h> //strcmp
+#include <sys/wait.h>
 
 using namespace std;
 
@@ -12,7 +13,7 @@ struct cell
 {
     int cellType;
     bool hit;
-    cell(){};
+    cell(){}
     cell(int cellType, bool hit)
     {
         this->cellType = cellType;
@@ -108,7 +109,7 @@ void processCoordinate(vector<vector<cell> >&board, char coordinate[]) // remove
     //Convertit la coordonnee a son index colonne respectif
     int column = int(coordinate[0]) - 65;
     int line   = int(coordinate[1]) - 48;
-    
+
     //La coordonnee contient un bateau
     if(board[line][column].cellType != 0)
     {
@@ -180,10 +181,6 @@ void randomizeBoard(vector<vector<cell> >&board)
                     }
                     break;
                 }
-                default:
-                {
-                    cout<<"wut how are u here"<<endl;
-                }
             }
         }while(!fits);
     }
@@ -225,7 +222,6 @@ int main()
         // in child1 process
         vector<vector<cell> > board(10, vector<cell>(10, cell(0,0)));
         randomizeBoard(board);
-        //affichage(board);
         // TODO: setup board
         char c[3];
 		read(p1[0], &c, 3); // read coordinate
@@ -235,17 +231,20 @@ int main()
             processCoordinate(board, c); // this updates hitOrMiss to contain "m", "h", or "hs"
             processHitOrMiss(hitOrMiss);
             write(p2[1], &hitOrMiss, 3); // write hit or miss
-            while(c == "h" || c == "hs")
+            while(strcmp(hitOrMiss, "h") == 0 || strcmp(hitOrMiss, "hs") == 0)
             {
                 read(p1[0], &c, 3); // read a coordinate
                 // TODO:process coordinate on our board
                 // TODO:c = h or m or hs
-                write(p2[1], "hs", 3); //send hit or miss
+                processCoordinate(board, c);
+                processHitOrMiss(hitOrMiss);
+                write(p2[1], &hitOrMiss, 3); //send hit or miss
             }
             // TODO: get user input (coordinate)
             write(p2[1], "A4", 3); //send a coordinate
             
             read(p1[0], &c, 3);    //read hit or miss
+
             while(c == "h" || c == "hs")
             {
                 // TODO: get user input (coordinate to send)
@@ -254,7 +253,6 @@ int main()
             }
             
             read(p1[0], &c, 3);     // read coordinate
-            //break;
         }
         printf("done1");
 		return 0; //end the process at the end
@@ -272,31 +270,29 @@ int main()
             char c[3];
             randomizeBoard(board); //TODO: remove this placeholder and let the player actually pick coords
             //TODO: maybe add half of the thing to randomize who starts
-            
+            affichage(board);
             //TODO: player picks a coordinate
             printf("Choose a coordinate to shoot at.");
-            string temp = "B3";
-            cin>>temp;
-            strncpy(c, temp.c_str(), sizeof(c));
-			sleep(3);
+            string userInput;
+            cin>>userInput;
+            strncpy(c, userInput.c_str(), sizeof(c));
             write(p1[1], &c, 3); // write coordinate
             while(gameNotDone)
             {
                 read(p2[0], &c, 3); // read hit or miss
-                while(strcmp(c, "h") == 0 || strcmp(c, "hs"))
+                while(strcmp(c, "h") == 0 || strcmp(c, "hs") == 0)
                 {
-                    // TODO: process board, pick new coordinate to send
                     printf("Choose a coordinate to shoot at.");
-                    string temp = "B3";
-                    cin>>temp;
-                    strncpy(c, temp.c_str(), sizeof(c));
-                    sleep(3);
+                    cin>>userInput;
+                    strncpy(c, userInput.c_str(), sizeof(c));
                     write(p1[1], &c, 3); // write coordinate
                     read(p2[0], &c, 3); //read hit or miss
                 }
                 read(p2[0], &c, 3); // read coordinate
+                cout<<endl<<"other guy sent: "<<c<<endl;
                 processCoordinate(board, c); // Gives hitOrMiss it's value
                 write(p1[1], &hitOrMiss, 3); // write hit or miss
+
                 while(c == "h" || c == "hs")
                 {
                     read(p2[0], &c, 3);  // read coordinate
@@ -306,19 +302,19 @@ int main()
                 
                 //TODO: figure out what coordinate to send
                 printf("Choose a coordinate to shoot at.");
-                string temp = "B3";
-                cin>>temp;
-                strncpy(c, temp.c_str(), sizeof(c));
-                sleep(3);
+                cin>>userInput;
+                strncpy(c, userInput.c_str(), sizeof(c));
                 write(p1[1], &c, 3);     // write coordinate
-                //break;
             }
             printf("2 done");
             return 0;
 		}
 		else
 		{
-			// in parent process
+            // in parent process
+            pid_t wpid;
+            int status = 0;
+            while ((wpid = wait(&status)) > 0); // wait for all child processes to end
 			//cout<<"Created child2 process: "<<child2<<endl;
 		}
     }
