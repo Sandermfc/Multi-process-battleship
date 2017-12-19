@@ -98,6 +98,41 @@ void affichage(vector<vector<cell> > &board)
     }
 }
 
+char hitOrMiss[2];
+//Prend une coordonnee et observe si cette position dans le tableau contient un bateau
+//Prend comme parametre le tableau, et une coordonnee
+//Retourne hit or miss
+void processCoordinate(vector<vector<cell> >&board, char coordinate[], char *hitOrMiss)
+{
+    //Convertit la coordonnee a son index colonne respectif
+    int column = int(coordinate[0]) - 65;
+    
+    //La coordonnee contient un bateau
+    if(board[coordinate[1]][column].cellType != 0)
+    {
+        //La case est donc frappe
+        board[coordinate[1]][column].hit = true;
+        //On decremente le int de la grandeur du bateau
+        shipLengths[board[coordinate[1]][column].cellType - 1] -= 1;
+        
+        //Si le bateau qui est frappe a une grandeur de 0, il est coule
+        if(shipLengths[board[coordinate[1]][column].cellType - 1] == 0)
+        {
+            hitOrMiss[0] = 'h';
+            hitOrMiss[1] = 's';
+            return;
+        }
+        hitOrMiss[0] = 'h';
+        return;    
+    }
+    else 
+    {
+        //la coordonnee ne contient pas de bateau
+        hitOrMiss[0] = 'm';
+        return;
+    }
+}
+
 void randomizeBoard(vector<vector<cell> >&board)
 {
     for(int i=0; i<shipLengths.size(); ++i)
