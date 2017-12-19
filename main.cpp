@@ -108,17 +108,20 @@ void processCoordinate(vector<vector<cell> >&board, char coordinate[]) // remove
 {
     //Convertit la coordonnee a son index colonne respectif
     int column = int(coordinate[0]) - 65;
-    int line   = int(coordinate[1]) - 48;
+    int line   = int(coordinate[1]) - 48 - 1;
 
     //La coordonnee contient un bateau
     if(board[line][column].cellType != 0)
     {
         //La case est donc frappe
         board[line][column].hit = true;
-        board[line][column].cellType = 0; //so we cant hit here again
         //On decremente le int de la grandeur du bateau
         shipLengths[board[line][column].cellType - 1] -= 1;
-        
+
+        for(int i=0; i<5; ++i)
+        {
+            cout<<shipLengths[i]<<endl;
+        }
         //Si le bateau qui est frappe a une grandeur de 0, il est coule
         if(shipLengths[board[line][column].cellType - 1] == 0)
         {
@@ -127,9 +130,13 @@ void processCoordinate(vector<vector<cell> >&board, char coordinate[]) // remove
             hitOrMiss[2] = '\0';
             return;
         }
-        hitOrMiss[0] = 'h';
-        hitOrMiss[1] = '\0';
-        return;    
+        else
+        {
+            hitOrMiss[0] = 'h';
+            hitOrMiss[1] = '\0';
+            return;
+        }
+        board[line][column].cellType = 0; //so we cant hit here again    
     }
     else 
     {
@@ -222,6 +229,7 @@ int main()
         // in child1 process
         vector<vector<cell> > board(10, vector<cell>(10, cell(0,0)));
         randomizeBoard(board);
+        affichage(board);
         // TODO: setup board
         char c[3];
 		read(p1[0], &c, 3); // read coordinate
@@ -270,7 +278,7 @@ int main()
             char c[3];
             randomizeBoard(board); //TODO: remove this placeholder and let the player actually pick coords
             //TODO: maybe add half of the thing to randomize who starts
-            affichage(board);
+            //affichage(board);
             //TODO: player picks a coordinate
             printf("Choose a coordinate to shoot at.");
             string userInput;
