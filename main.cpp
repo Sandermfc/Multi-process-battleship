@@ -110,6 +110,13 @@ void processCoordinate(vector<vector<cell> >&board, char coordinate[]) // remove
     int column = int(coordinate[0]) - 65;
     int line   = int(coordinate[1]) - 48 - 1;
 
+    // Check if valid choice
+    if(!(line >= 0 && line < 10 && column >= 0 && column < 10))
+    {
+        hitOrMiss[0] = '?';
+        hitOrMiss[1] = '\0';
+        return;
+    }
     //La coordonnee contient un bateau
     if(board[line][column].cellType != 0)
     {
@@ -117,11 +124,6 @@ void processCoordinate(vector<vector<cell> >&board, char coordinate[]) // remove
         board[line][column].hit = true;
         //On decremente le int de la grandeur du bateau
         shipLengths[board[line][column].cellType - 1] -= 1;
-
-        for(int i=0; i<5; ++i)
-        {
-            cout<<shipLengths[i]<<endl;
-        }
         //Si le bateau qui est frappe a une grandeur de 0, il est coule
         if(shipLengths[board[line][column].cellType - 1] == 0)
         {
@@ -195,6 +197,10 @@ void randomizeBoard(vector<vector<cell> >&board)
 
 void processHitOrMiss(char c[])
 {
+    if(strcmp(hitOrMiss, "?") == 0)
+    {
+        cout<<"Not a valid coordinate."<<endl;
+    }
     if(strcmp(hitOrMiss, "m") == 0)
     {
         cout<<"miss."<<endl;
@@ -239,7 +245,7 @@ int main()
             processCoordinate(board, c); // this updates hitOrMiss to contain "m", "h", or "hs"
             processHitOrMiss(hitOrMiss);
             write(p2[1], &hitOrMiss, 3); // write hit or miss
-            while(strcmp(hitOrMiss, "h") == 0 || strcmp(hitOrMiss, "hs") == 0)
+            while(strcmp(hitOrMiss, "h") == 0 || strcmp(hitOrMiss, "hs") == 0 || strcmp(hitOrMiss, "?") == 0)
             {
                 read(p1[0], &c, 3); // read a coordinate
                 // TODO:process coordinate on our board
@@ -253,7 +259,7 @@ int main()
             
             read(p1[0], &c, 3);    //read hit or miss
 
-            while(c == "h" || c == "hs")
+            while(strcmp(c, "h") == 0 || strcmp(c, "hs") == 0)
             {
                 // TODO: get user input (coordinate to send)
                 write(p2[1], "B2", 3);  // write a coordinate
@@ -279,7 +285,6 @@ int main()
             randomizeBoard(board); //TODO: remove this placeholder and let the player actually pick coords
             //TODO: maybe add half of the thing to randomize who starts
             //affichage(board);
-            //TODO: player picks a coordinate
             printf("Choose a coordinate to shoot at.");
             string userInput;
             cin>>userInput;
@@ -288,7 +293,7 @@ int main()
             while(gameNotDone)
             {
                 read(p2[0], &c, 3); // read hit or miss
-                while(strcmp(c, "h") == 0 || strcmp(c, "hs") == 0)
+                while(strcmp(c, "h") == 0 || strcmp(c, "hs") == 0 || strcmp(c, "?") == 0)
                 {
                     printf("Choose a coordinate to shoot at.");
                     cin>>userInput;
@@ -301,7 +306,7 @@ int main()
                 processCoordinate(board, c); // Gives hitOrMiss it's value
                 write(p1[1], &hitOrMiss, 3); // write hit or miss
 
-                while(c == "h" || c == "hs")
+                while(strcmp(hitOrMiss, "h") == 0 || strcmp(hitOrMiss, "hs") == 0)
                 {
                     read(p2[0], &c, 3);  // read coordinate
                     processCoordinate(board, c); // Gives hitOrMiss it's value
