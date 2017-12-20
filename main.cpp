@@ -14,11 +14,13 @@ struct cell
 {
     int cellType;
     bool hit;
+    bool usedSquare;
     cell(){}
-    cell(int cellType, bool hit)
+    cell(int cellType, bool hit, bool usedSquare = false)
     {
         this->cellType = cellType;
         this->hit = hit;
+        this->usedSquare = usedSquare;
     }
 };
 
@@ -87,9 +89,41 @@ void affichage(vector<vector<cell> > &board)
         for(int j = 0; j < 10; j++)
         {
             //Insertion des valeurs contenues dans le tableau du user
-            if(board[i][j].hit)
+            if(board[i][j].hit )//&& board[i][j].cellType == 0)
             {
-                printf("| x ");
+                printf("| X ");
+            }
+            else if(board[i][j].usedSquare)
+            {
+                printf("| O ");
+            }
+            else
+            {
+                printf("| %d ", board[i][j].cellType);
+            }
+        }
+        printf("\n");
+    }
+}
+
+void affichageOtherBoard(vector<vector<cell> > &board)
+{
+    printf("     A   B   C   D   E   F   G   H   I   J \n");
+    for(int i = 0; i < 10; i++)
+    {
+        printf("   -----------------------------------------\n");
+        printf("%d  ", (i));
+        
+        for(int j = 0; j < 10; j++)
+        {
+            //Insertion des valeurs contenues dans le tableau du user
+            if(board[i][j].hit )
+            {
+                printf("| X ");
+            }
+            else if(board[i][j].usedSquare)
+            {
+                printf("| M ");
             }
             else
             {
@@ -311,6 +345,20 @@ void placeUserBoat(vector<vector<cell> > &board, pid_t ppid)
     }
 }
 
+void processSentCoordinate(vector<vector<cell> > &otherBoard, char (&c)[3], char (&hm)[3])
+{
+    //Convertit la coordonnee a son index colonne respectif
+    int column = int(c[0]) - 65;
+    int line   = int(c[1]) - 48;
+    if(!(line >= 0 && line < 10 && column >= 0 && column < 10))
+    {
+        return;
+    }
+    if(strcmp(hm, "h") == 0 || strcmp(hm, "hs") == 0)
+        otherBoard[line][column].hit = true;
+    otherBoard[line][column].usedSquare = true;
+}
+
 int main()
 {
     srand(time(NULL));
@@ -332,6 +380,7 @@ int main()
         bool gameNotDone = true;
         // in child1 process
         vector<vector<cell> > board(10, vector<cell>(10, cell(0,0)));
+        vector<vector<cell> > otherBoard(10, vector<cell>(10, cell(0,0)));
         randomizeBoard(board);
         //affichage(board);
         char c[3];
@@ -362,6 +411,8 @@ int main()
                     if(numberOfSankBoats == 5)
                     {
                         printf("Computer wins!\n");
+                        affichageOtherBoard(otherBoard);
+                        affichage(board);
                         exit(0);
                     }
                 }
@@ -386,7 +437,9 @@ int main()
             int numberOfSankBoats = 0;
             bool gameNotDone = true;
             vector<vector<cell> > board(10, vector<cell>(10, cell(0,0)));
+            vector<vector<cell> > otherBoard(10, vector<cell>(10, cell(0,0)));
             char c[3];
+            char hm[3];
             placeUserBoat(board, ppid);
             //randomizeBoard(board); //TODO: remove this placeholder and let the player actually pick coords
             //TODO: maybe add half of the thing to randomize who starts
@@ -399,23 +452,32 @@ int main()
             write(p1[1], &c, 3); // write coordinate
             while(gameNotDone)
             {
-                read(p2[0], &c, 3); // read hit or miss
-                while(strcmp(c, "h") == 0 || strcmp(c, "hs") == 0 || strcmp(c, "?") == 0)
+                read(p2[0], &hm, 3); // read hit or miss
+                processSentCoordinate(otherBoard, c, hm);
+                affichageOtherBoard(otherBoard);
+                affichage(board);
+                while(strcmp(hm, "h") == 0 || strcmp(hm, "hs") == 0 || strcmp(hm, "?") == 0)
                 {
-                    if(strcmp(c, "hs") == 0)
+                    if(strcmp(hm, "hs") == 0)
                     {
                         numberOfSankBoats++;
                         if(numberOfSankBoats == 5)
                         {
                             printf("Player wins!\n");
+                            affichageOtherBoard(otherBoard);
+                            affichage(board);
                             exit(0);
                         }
                     }
                     printf("Choose a coordinate to shoot at.");
                     cin>>userInput;
                     strncpy(c, userInput.c_str(), sizeof(c));
+                    ifIsKill(c, ppid);
                     write(p1[1], &c, 3); // write coordinate
-                    read(p2[0], &c, 3); //read hit or miss
+                    read(p2[0], &hm, 3); //read hit or miss
+                    processSentCoordinate(otherBoard, c, hm);
+                    affichageOtherBoard(otherBoard);
+                    affichage(board);
                 }
                 read(p2[0], &c, 3); // read coordinate
                 cout<<endl<<"other guy sent: "<<c<<endl;
@@ -425,17 +487,17 @@ int main()
                 {
                     read(p2[0], &c, 3);  // read coordinate
                     cout<<endl<<"other guy sent: "<<c<<endl;
-                    affichage(board);
                     processCoordinate(board, c); // Gives hitOrMiss it's value
                     write(p1[1], &hitOrMiss, 3); // write hit or miss
                 }
+                affichageOtherBoard(otherBoard);
                 affichage(board);
                 printf("Choose a coordinate to shoot at.");
                 cin>>userInput;
                 strncpy(c, userInput.c_str(), sizeof(c));
+                ifIsKill(c, ppid);
                 write(p1[1], &c, 3);     // write coordinate
             }
-            printf("2 done");
             return 0;
 		}
 		else
@@ -443,7 +505,7 @@ int main()
             // in parent process
             pid_t wpid;
             int status = 0;
-            while ((wpid = wait(&status)) > 0); // wait for all child processes to end
+            wait(&status); // wait for a child processes to end
             kill(child1, SIGKILL); // kill computer process
             kill(child2, SIGKILL); // kill player process just in case
 		}
