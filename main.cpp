@@ -93,10 +93,25 @@ void affichage(vector<vector<cell> > &board)
         for(int j = 0; j < 9; j++)
         {
             //Insertion des valeurs contenues dans le tableau du user
-            printf("| %d ", board[i][j].cellType);
+            if(board[i][j].hit)
+            {
+                printf("| x ");
+            }
+            else
+            {
+                printf("| %d ", board[i][j].cellType);
+            }
         }
-        printf("| %d ", board[i][9].cellType);
-        printf("|\n");
+        if(board[i][9].hit)
+        {
+            printf("| x ");
+            printf("|\n");
+        }
+        else
+        {
+            printf("| %d ", board[i][9].cellType);
+            printf("|\n");
+        }
     }
 }
 
@@ -130,13 +145,11 @@ void processCoordinate(vector<vector<cell> >&board, char coordinate[]) // remove
             hitOrMiss[0] = 'h';
             hitOrMiss[1] = 's';
             hitOrMiss[2] = '\0';
-            return;
         }
         else
         {
             hitOrMiss[0] = 'h';
             hitOrMiss[1] = '\0';
-            return;
         }
         board[line][column].cellType = 0; //so we cant hit here again    
     }
@@ -145,7 +158,6 @@ void processCoordinate(vector<vector<cell> >&board, char coordinate[]) // remove
         //la coordonnee ne contient pas de bateau
         hitOrMiss[0] = 'm';
         hitOrMiss[1] = '\0';
-        return;
     }
 }
 
@@ -417,6 +429,8 @@ int main()
                 while(strcmp(hitOrMiss, "h") == 0 || strcmp(hitOrMiss, "hs") == 0)
                 {
                     read(p2[0], &c, 3);  // read coordinate
+                    cout<<endl<<"other guy sent: "<<c<<endl;
+                    affichage(board);
                     processCoordinate(board, c); // Gives hitOrMiss it's value
                     write(p1[1], &hitOrMiss, 3); // write hit or miss
                 }
