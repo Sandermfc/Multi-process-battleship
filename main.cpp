@@ -6,6 +6,7 @@
 #include <vector>
 #include <cmath> //abs
 #include <sys/wait.h>
+#include <signal.h>
 
 using namespace std;
 
@@ -264,8 +265,15 @@ void randomCoordinate(char (&prevHit)[3])
     }
 }
 
+void ifIsKill(char (&c)[3], pid_t ppid)
+{
+    if(strcmp(c, "q") == 0)
+    {
+        exit(0);
+    }
+}
 
-void placeUserBoat(vector<vector<cell> > &board)
+void placeUserBoat(vector<vector<cell> > &board, pid_t ppid)
 {
     for(int i=0; i<shipLengths.size(); ++i)
     {
@@ -279,10 +287,11 @@ void placeUserBoat(vector<vector<cell> > &board)
             printf("Give initial coordinates to place the boat of length %d (EX: A1):\n", shipLengths[i]);
             cin >> coord1;
             coord1[2] = '\0';
+            ifIsKill(coord1, ppid);
             printf("\nGive the final coordinates to place the boat %d:\n", shipLengths[i]);
             cin >> coord2;
             coord2[2] = '\0';
-            printf("%d", coordToCoord(board, coord1, coord2));
+            ifIsKill(coord1, ppid);
             if(coordToCoord(board, coord1, coord2) == shipLengths[i])
             {
                 coordToCoord(board, coord1, coord2, (i + 1));
@@ -313,6 +322,7 @@ int main()
     int p2[2]; //pipe pour le processus 2
 	pipe(p2);
 	
+    pid_t ppid = getpid();
     pid_t child1;
 	pid_t child2;
 	child1 = fork();
@@ -352,7 +362,7 @@ int main()
                     if(numberOfSankBoats == 5)
                     {
                         printf("Computer wins!\n");
-                        //TODO: endGame();
+                        exit(0);
                     }
                 }
                 randomCoordinate(prevHit); // get computer input
@@ -377,7 +387,7 @@ int main()
             bool gameNotDone = true;
             vector<vector<cell> > board(10, vector<cell>(10, cell(0,0)));
             char c[3];
-            placeUserBoat(board);
+            placeUserBoat(board, ppid);
             //randomizeBoard(board); //TODO: remove this placeholder and let the player actually pick coords
             //TODO: maybe add half of the thing to randomize who starts
             //affichageEnemyBoard();
@@ -385,6 +395,7 @@ int main()
             string userInput;
             cin>>userInput;
             strncpy(c, userInput.c_str(), sizeof(c));
+            ifIsKill(c, ppid);
             write(p1[1], &c, 3); // write coordinate
             while(gameNotDone)
             {
@@ -397,7 +408,7 @@ int main()
                         if(numberOfSankBoats == 5)
                         {
                             printf("Player wins!\n");
-                            //TODO: endGame();
+                            exit(0);
                         }
                     }
                     printf("Choose a coordinate to shoot at.");
@@ -433,7 +444,8 @@ int main()
             pid_t wpid;
             int status = 0;
             while ((wpid = wait(&status)) > 0); // wait for all child processes to end
-			//cout<<"Created child2 process: "<<child2<<endl;
+            kill(child1, SIGKILL); // kill computer process
+            kill(child2, SIGKILL); // kill player process just in case
 		}
     }
 	return 0;
