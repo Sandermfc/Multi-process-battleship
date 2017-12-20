@@ -30,8 +30,8 @@ int coordToCoord(vector<vector<cell> >&board, char coord1[], char coord2[], int 
     if(coord1[0] == coord2[0])
     {
         //letters are the same
-        int c1 = int(coord1[1]) - 48;
-        int c2 = int(coord2[1]) - 48;
+        int c1 = int(coord1[1]) - 48 - 1;
+        int c2 = int(coord2[1]) - 48 - 1;
         if(c1 < 10 && c1 >= 0 && c2 < 10 && c2 >= 0)
         {
             int otherCoord = int(coord1[0]) - int('A');
@@ -46,7 +46,7 @@ int coordToCoord(vector<vector<cell> >&board, char coord1[], char coord2[], int 
                     board[i][otherCoord].cellType = placeBoat;
                 }
             }
-            return abs(c1 - c2);
+            return abs(c1 - c2) + 1;
         }
     }
     else if(coord1[1] == coord2[1])
@@ -68,7 +68,7 @@ int coordToCoord(vector<vector<cell> >&board, char coord1[], char coord2[], int 
                     board[otherCoord][i].cellType = placeBoat;
                 }
             }
-            return abs(c1 - c2);
+            return abs(c1 - c2) + 1;
         }
     }
     return -1;
@@ -268,6 +268,44 @@ void randomCoordinate(char (&prevHit)[3])
     }
 }
 
+
+void placeUserBoat(vector<vector<cell> > &board)
+{
+    for(int i=0; i<shipLengths.size(); ++i)
+    {
+        bool fits;
+        char coord1[3];
+        char coord2[3];
+        
+        do
+        {
+            fits = false;
+            printf("Give initial coordinates to place the boat of length %d (EX: A1):\n", shipLengths[i]);
+            cin >> coord1;
+            coord1[2] = '\0';
+            printf("\nGive the final coordinates to place the boat %d:\n", shipLengths[i]);
+            cin >> coord2;
+            coord2[2] = '\0';
+            
+            if(coordToCoord(board, coord1, coord2) == shipLengths[i])
+            {
+                coordToCoord(board, coord1, coord2, (i + 1));
+                fits = true;
+                affichage(board);
+            }
+            else if(coordToCoord(board, coord1, coord2) == -1)
+            {
+                printf("\nDoes not fit, try new coordinates\n");
+            }
+            else
+            {
+                printf("\nInvalid coordinates\n");
+            }
+        
+        }while(!fits);
+    }
+}
+
 int main()
 {
     srand(time(NULL));
@@ -332,9 +370,10 @@ int main()
             bool gameNotDone = true;
             vector<vector<cell> > board(10, vector<cell>(10, cell(0,0)));
             char c[3];
-            randomizeBoard(board); //TODO: remove this placeholder and let the player actually pick coords
+            placeUserBoat(board);
+            //randomizeBoard(board); //TODO: remove this placeholder and let the player actually pick coords
             //TODO: maybe add half of the thing to randomize who starts
-            affichage(board);
+            //affichageEnemyBoard();
             printf("Choose a coordinate to shoot at.");
             string userInput;
             cin>>userInput;
