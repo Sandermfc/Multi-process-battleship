@@ -56,7 +56,7 @@ int coordToCoord(vector<vector<cell> >&board, char coord1[], char coord2[], int 
         int c2 = int(coord2[0]) - int('A');
         if(c1 < 10 && c1 >= 0 && c2 < 10 && c2 >= 0)
         {
-            int otherCoord = int(coord1[1]) - int('0');
+            int otherCoord = int(coord1[1]) - int('0') - 1;
             for(int i=min(c1,c2); i<=max(c1,c2); ++i)
             {
                 if(board[otherCoord][i].cellType != 0)
@@ -322,6 +322,7 @@ int main()
 	child1 = fork();
 	if(child1 == 0)
 	{
+        int numberOfSankBoats = 0;
         bool gameNotDone = true;
         // in child1 process
         vector<vector<cell> > board(10, vector<cell>(10, cell(0,0)));
@@ -349,6 +350,15 @@ int main()
             read(p1[0], &c, 3);    //read hit or miss
             while(strcmp(c, "h") == 0 || strcmp(c, "hs") == 0)
             {
+                if(strcmp(c, "hs") == 0)
+                {
+                    numberOfSankBoats++;
+                    if(numberOfSankBoats == 5)
+                    {
+                        printf("Computer wins!\n");
+                        //TODO: endGame();
+                    }
+                }
                 randomCoordinate(prevHit); // get computer input
                 write(p2[1], &prevHit, 3);  // write a coordinate
                 read(p1[0], &c, 3);     // read hit or miss
@@ -367,6 +377,7 @@ int main()
         child2 = fork();
 		if(child2 == 0)
 		{
+            int numberOfSankBoats = 0;
             bool gameNotDone = true;
             vector<vector<cell> > board(10, vector<cell>(10, cell(0,0)));
             char c[3];
@@ -384,6 +395,15 @@ int main()
                 read(p2[0], &c, 3); // read hit or miss
                 while(strcmp(c, "h") == 0 || strcmp(c, "hs") == 0 || strcmp(c, "?") == 0)
                 {
+                    if(strcmp(c, "hs") == 0)
+                    {
+                        numberOfSankBoats++;
+                        if(numberOfSankBoats == 5)
+                        {
+                            printf("Player wins!\n");
+                            //TODO: endGame();
+                        }
+                    }
                     printf("Choose a coordinate to shoot at.");
                     cin>>userInput;
                     strncpy(c, userInput.c_str(), sizeof(c));
