@@ -215,7 +215,7 @@ void randomizeBoard(vector<vector<cell> >&board)
                 case 0:
                 {
                     //en bas
-                    char coord2[2] = {char(x+int('A')), char(y+int('0')+shipLengths[i])};
+                    char coord2[2] = {char(x+int('A')), char(y+int('0')+shipLengths[i]-1)};
                     if(coordToCoord(board, coord1, coord2) >= 0)
                     {
                         // place le bateaux de coord1 a coord2
@@ -228,7 +228,7 @@ void randomizeBoard(vector<vector<cell> >&board)
                 {
                     
                     // a droite
-                    char coord2[2] = {char(x+int('A')+shipLengths[i]), char(y+int('0'))};
+                    char coord2[2] = {char(x+int('A')+shipLengths[i]-1), char(y+int('0'))};
                     if(coordToCoord(board, coord1, coord2) >= 0)
                     {
                         // place le bateaux de coord1 a coord2
