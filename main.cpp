@@ -30,8 +30,8 @@ int coordToCoord(vector<vector<cell> >&board, char coord1[], char coord2[], int 
     if(coord1[0] == coord2[0])
     {
         //letters are the same
-        int c1 = int(coord1[1]) - 48 - 1;
-        int c2 = int(coord2[1]) - 48 - 1;
+        int c1 = int(coord1[1]) - 48;
+        int c2 = int(coord2[1]) - 48;
         if(c1 < 10 && c1 >= 0 && c2 < 10 && c2 >= 0)
         {
             int otherCoord = int(coord1[0]) - int('A');
@@ -56,7 +56,7 @@ int coordToCoord(vector<vector<cell> >&board, char coord1[], char coord2[], int 
         int c2 = int(coord2[0]) - int('A');
         if(c1 < 10 && c1 >= 0 && c2 < 10 && c2 >= 0)
         {
-            int otherCoord = int(coord1[1]) - int('0') - 1;
+            int otherCoord = int(coord1[1]) - int('0');
             for(int i=min(c1,c2); i<=max(c1,c2); ++i)
             {
                 if(board[otherCoord][i].cellType != 0)
@@ -81,16 +81,9 @@ void affichage(vector<vector<cell> > &board)
     for(int i = 0; i < 10; i++)
     {
         printf("   -----------------------------------------\n");
-        if(i == 9)
-        {
-            printf("%d ", (i+1));
-        }
-        else
-        {
-            printf("%d  ", (i+1));
-        }
+        printf("%d  ", (i));
         
-        for(int j = 0; j < 9; j++)
+        for(int j = 0; j < 10; j++)
         {
             //Insertion des valeurs contenues dans le tableau du user
             if(board[i][j].hit)
@@ -102,16 +95,7 @@ void affichage(vector<vector<cell> > &board)
                 printf("| %d ", board[i][j].cellType);
             }
         }
-        if(board[i][9].hit)
-        {
-            printf("| x ");
-            printf("|\n");
-        }
-        else
-        {
-            printf("| %d ", board[i][9].cellType);
-            printf("|\n");
-        }
+        printf("\n");
     }
 }
 
@@ -123,7 +107,7 @@ void processCoordinate(vector<vector<cell> >&board, char coordinate[]) // remove
 {
     //Convertit la coordonnee a son index colonne respectif
     int column = int(coordinate[0]) - 65;
-    int line   = int(coordinate[1]) - 48 - 1;
+    int line   = int(coordinate[1]) - 48;
 
     // Check if valid choice
     if(!(line >= 0 && line < 10 && column >= 0 && column < 10))
@@ -275,7 +259,7 @@ void randomCoordinate(char (&prevHit)[3])
     else
     {
         prevHit[0] = char(rand()%10 + int('A'));
-        prevHit[1] = char(rand()%10 + int('1'));
+        prevHit[1] = char(rand()%10 + int('0'));
         prevHit[2] = '\0';
     }
 }
@@ -298,7 +282,7 @@ void placeUserBoat(vector<vector<cell> > &board)
             printf("\nGive the final coordinates to place the boat %d:\n", shipLengths[i]);
             cin >> coord2;
             coord2[2] = '\0';
-            
+            printf("%d", coordToCoord(board, coord1, coord2));
             if(coordToCoord(board, coord1, coord2) == shipLengths[i])
             {
                 coordToCoord(board, coord1, coord2, (i + 1));
