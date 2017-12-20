@@ -1,3 +1,19 @@
+/*
+ * Noms:
+ * Mathieu Robinson
+ * Patrick Doucet
+ * 
+ * NIs:
+ * A00171914
+ * A00177291
+ */
+
+/*
+ * Ce programme diverge un peu des règles dans projet.pdf comme suit:
+ * A-J est l'axe horizontale et 0-9 est l'axe verticale.
+ * Quand un des joueurs frappe un bateau, il a le droit a un autre tire. (l'adversaire perd son tour).
+ */
+
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
